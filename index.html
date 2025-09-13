@@ -26,7 +26,7 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            overflow: hidden; /* Prevent scrolling of the whole page */
+            overflow: hidden; 
         }
 
         #app-container {
@@ -35,7 +35,7 @@
             flex-direction: column;
         }
 
-        /* Lite Mode - No Map */
+        
         #app-container.lite-mode-on #map-area {
             display: none;
         }
@@ -46,7 +46,7 @@
             border-top: none;
         }
 
-        /* Header Styling */
+        
         header {
             background-color: var(--card-background);
             padding: 12px 16px;
@@ -70,7 +70,7 @@
             margin-right: 10px;
         }
 
-        /* Lite Mode Toggle */
+        
         .lite-mode-toggle {
             display: flex;
             align-items: center;
@@ -128,14 +128,14 @@
             transform: translateX(20px);
         }
 
-        /* Main Content Area */
+        
         #main-content {
             flex-grow: 1;
             display: flex;
             overflow: hidden;
         }
 
-        /* Sidebar Styling */
+        
         #sidebar {
             width: 320px;
             background-color: var(--card-background);
@@ -170,7 +170,7 @@
             border-radius: 8px;
             padding: 12px;
             font-size: 0.875rem;
-            display: none; /* Initially hidden */
+            display: none; 
         }
         
         #bus-info-content p {
@@ -221,7 +221,7 @@
 
         .eta {
             font-weight: 600;
-            color: #16a34a; /* Green for ETA */
+            color: #16a34a; 
         }
         
         .eta.arrived {
@@ -229,7 +229,6 @@
             font-weight: 500;
         }
         
-        /* Map Area */
         #map-area {
             flex-grow: 1;
             position: relative;
@@ -240,7 +239,6 @@
             width: 100%;
         }
 
-        /* Custom Leaflet Icons */
         .bus-icon {
             text-align: center;
             font-size: 1.8rem;
@@ -258,7 +256,6 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
         
-        /* Loading Overlay */
         #loading-overlay {
             position: absolute;
             top: 0;
@@ -293,19 +290,18 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             #main-content {
-                flex-direction: column-reverse; /* Put map on top */
+                flex-direction: column-reverse; 
             }
 
             #app-container.lite-mode-on #main-content {
-                flex-direction: column; /* In lite mode, sidebar is the only element */
+                flex-direction: column; 
             }
 
             #sidebar {
                 width: 100%;
-                height: 40%; /* Take 40% of the screen height */
+                height: 40%; 
                 box-sizing: border-box;
                 border-top: 1px solid #d1d5db;
                 box-shadow: none;
@@ -366,15 +362,14 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // --- CONFIGURATION ---
-        const PONDHA_UTTARAKHAND_COORDS = [30.3479, 77.9422]; // Centered on Pondha
+        
+        const PONDHA_UTTARAKHAND_COORDS = [30.3479, 77.9422]; 
         const DEFAULT_ZOOM = 13;
         const LITE_MODE_ZOOM = 12;
-        const NORMAL_UPDATE_INTERVAL = 3000; // 3 seconds
-        const LITE_UPDATE_INTERVAL = 10000; // 10 seconds
-        const STOP_DWELL_TIME_SECONDS = 30; // How many seconds a bus waits at each stop
+        const NORMAL_UPDATE_INTERVAL = 3000; 
+        const LITE_UPDATE_INTERVAL = 10000; 
+        const STOP_DWELL_TIME_SECONDS = 30; 
 
-        // --- DOM ELEMENTS ---
         const routeSelect = document.getElementById('route-select');
         const stopsContainer = document.getElementById('stops-container');
         const busInfoContent = document.getElementById('bus-info-content');
@@ -384,7 +379,6 @@
         const liteModeToggle = document.getElementById('lite-mode');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // --- STATE ---
         let map;
         let busMarkers = {};
         let routeLayers = {};
@@ -429,20 +423,17 @@
             ]
         };
 
-        // --- INITIALIZATION ---
         function init() {
             initMap();
             populateRouteSelector();
             setupEventListeners();
             
-            // Initial selection
             selectedRouteId = mockApiData.routes[0].id;
             routeSelect.value = selectedRouteId;
             
             drawRoutes();
             startSimulation();
             
-            // Hide loading overlay after a short delay
             setTimeout(() => {
                 loadingOverlay.style.display = 'none';
             }, 1500);
@@ -469,7 +460,6 @@
             liteModeToggle.addEventListener('change', handleLiteModeToggle);
         }
 
-        // --- EVENT HANDLERS ---
         function handleRouteChange(e) {
             selectedRouteId = e.target.value;
             updateDisplay();
@@ -484,34 +474,30 @@
             const appContainer = document.getElementById('app-container');
             console.log('Lite Mode:', isLiteMode ? 'ON' : 'OFF');
 
-            // Redraw route lines and stops with new styling for when map is visible/hidden
             drawRoutes(); 
 
             if (isLiteMode) {
                 appContainer.classList.add('lite-mode-on');
             } else {
                 appContainer.classList.remove('lite-mode-on');
-                // When map reappears, it needs its size recalculated
                 setTimeout(() => map.invalidateSize(), 10);
             }
 
             stopSimulation();
-            startSimulation(); // This will set up the correct update loop
+            startSimulation(); 
         }
 
-        // --- SIMULATION & UPDATES ---
         function startSimulation() {
             const interval = isLiteMode ? LITE_UPDATE_INTERVAL : NORMAL_UPDATE_INTERVAL;
             if (updateIntervalId) clearInterval(updateIntervalId);
 
-            // In lite mode, we only update the text sidebar. In normal mode, we update everything.
             const updateFunction = isLiteMode ? updateSidebar : updateDisplay;
 
             updateIntervalId = setInterval(() => {
                 simulateBusMovement();
                 updateFunction();
             }, interval);
-            updateFunction(); // Initial call to show data immediately
+            updateFunction(); 
         }
 
         function stopSimulation() {
@@ -519,20 +505,16 @@
         }
         
         function simulateBusMovement() {
-            // Simulate buses moving along their routes
             mockApiData.buses.forEach(bus => {
-                bus.progress += 0.01; // Move forward
+                bus.progress += 0.01; 
                 if (bus.progress > 1) {
-                    bus.progress = 0; // Loop back to the start
+                    bus.progress = 0; 
                 }
-                // Randomize speed slightly
                 bus.speed = Math.max(20, Math.min(50, bus.speed + (Math.random() - 0.5) * 5));
             });
         }
         
-        // --- DISPLAY & DRAWING ---
         function drawRoutes() {
-            // Clear existing route layers
             Object.values(routeLayers).forEach(layer => map.removeLayer(layer));
             routeLayers = {};
 
@@ -557,7 +539,6 @@
         }
         
         function updateDisplay() {
-            // Update route visibility
             Object.keys(routeLayers).forEach(routeId => {
                 if (routeId === selectedRouteId) {
                     if (!map.hasLayer(routeLayers[routeId])) {
@@ -577,7 +558,6 @@
         function updateBusMarkers() {
             const visibleBuses = mockApiData.buses.filter(b => b.routeId === selectedRouteId);
             
-            // Remove markers for buses no longer on this route (or all if switching)
             Object.keys(busMarkers).forEach(busId => {
                 if (!visibleBuses.some(b => b.id === busId)) {
                     map.removeLayer(busMarkers[busId]);
@@ -627,20 +607,18 @@
                 return;
             }
 
-            // For simplicity, we show info for the first bus on the route
             const busToShow = busesOnRoute[0];
             busInfoContent.style.display = 'block';
             infoBusNumber.textContent = busToShow.id;
             infoBusSpeed.textContent = busToShow.speed.toFixed(0);
             infoBusStatus.textContent = 'On Route';
 
-            // Calculate ETAs
             stopsContainer.innerHTML = '';
             const totalRouteDistance = getRouteDistance(route.stops.map(s => s.coords));
             const busTravelledDistance = totalRouteDistance * busToShow.progress;
             
             let accumulatedDistance = 0;
-            let upcomingStopsToPass = 0; // Counter for stops the bus hasn't reached yet
+            let upcomingStopsToPass = 0; 
 
             for (let i = 0; i < route.stops.length; i++) {
                 const stop = route.stops[i];
@@ -655,23 +633,18 @@
                 if (accumulatedDistance < busTravelledDistance) {
                     etaHtml = `<span class="eta arrived">Arrived</span>`;
                 } else {
-                    // This is an upcoming stop
                     const distanceToStop = accumulatedDistance - busTravelledDistance;
                     
-                    // More accurate time calculation (speed km/h -> m/s)
                     const speedInMetersPerSecond = (busToShow.speed * 1000) / 3600;
                     const travelTimeInSeconds = distanceToStop / speedInMetersPerSecond;
 
-                    // Calculate the total time the bus will wait at stops before this one
                     const dwellTimeInSeconds = upcomingStopsToPass * STOP_DWELL_TIME_SECONDS;
 
-                    // Add travel time and dwell time together for the final ETA
                     const totalEtaInSeconds = travelTimeInSeconds + dwellTimeInSeconds;
                     const timeInMinutes = Math.ceil(totalEtaInSeconds / 60);
 
                     etaHtml = `<span class="eta">${timeInMinutes} min</span>`;
                     
-                    // Increment the counter for the next stop's calculation
                     upcomingStopsToPass++;
                 }
 
@@ -686,7 +659,7 @@
             }
         }
         
-        // --- UTILITY FUNCTIONS ---
+
         function getLatLngOnRoute(coords, progress) {
             const totalDist = getRouteDistance(coords);
             const targetDist = totalDist * progress;
@@ -707,7 +680,7 @@
                 }
                 travelledDist += segmentDist;
             }
-            return coords[coords.length - 1]; // Fallback to last point
+            return coords[coords.length - 1]; 
         }
 
         function getRouteDistance(coords) {
@@ -718,7 +691,7 @@
             return totalDist;
         }
 
-        // --- START THE APP ---
+        
         init();
     });
     </script>
